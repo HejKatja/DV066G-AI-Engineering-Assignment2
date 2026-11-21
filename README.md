@@ -161,16 +161,17 @@ All of the aforementioned tests were run 5 times and passed in every run. Does t
 
 ### Do the tests always give the same result?
 
-If by this question we mean the same pass/fail result, then yes, the tests gave the same result (pass) in all 5 runs. We believe this is because the model's training data is not corrupted with incorrect information about the facts that Stockholm and Canberra are the capitals of Sweden and Australia respectively. So the correct answer is by far the most probable one. The question itself is also very simple and unambiguous, which leaves little chance for the model to answer incorrectly. <br>
+If by this question we mean the same pass/fail result, then yes, the tests gave the same result (pass) in all 5 runs. A likely explanation is that the model's training data is not corrupted with incorrect information about the facts that Stockholm and Canberra are the capitals of Sweden and Australia respectively. So the correct answer is by far the most probable one. The question itself is also very simple and unambiguous, which leaves little chance for the model to answer incorrectly. <br>
 
 However, the stable result we've got should not be considered as proof that the model does not hallucinate or that it is completely free from bias and mistakes. Since hallucinations often stem from poor/biased training data, factual mistakes or vague prompts (to name a few), we could mitigate them by using well-designed tests. First of all, the tests are built around a clear and straightforward prompt that contains no false premises and asks for a well-documented fact that is unlikely to confuse the model. Moreover, the LLM-as-a-judge is used in a way that also helps to reduce its own risk of hallucinating: the judge is given the expected answer, the prompt is clear and constraint (yes or no). Since we use the same model for testing and judging, this also helps to mitigate models' blind spots (shared training data with the same mistakes). In addition, the consistency tests use a threshold of 2 correct answers out of 3, which protects against a single random mistake but at the same time means that one incorrect answer can pass unnoticed. 
-
 
 If the question instead addresses the determinism of the model ,meaning whether it gaves identical answers every time, then we cannot answer it, since tests are not designed to evaluate it. The tests do not compare the model's answers with each other across different runs, they only check whether each answer contains the expected word ("Stockholm" or "Canberra"), so different variations of a correct answer will still pass. Because the model's ouput is generated with some inherent randomness, it is likely that the wording varied between runs, but our tests would not have shown it.
 
 ### Can we tell whether a failure comes from the model or the judge? 
 
-Yes, the design of the tests makes it possible to differintiate the source of failure. 
+Yes, the design of the tests makes it possible to differentiate the source of failure. If a consistency test fails, we know that judge is not the source of the problem, since these tests are not connected (the tested model's answer is not passed as an argument to the judge). The cause of the failure can be a failed call to Ollama (due to timeout or problems with model's configuration) or insufficient threshold level (due to hallucinations or strict string control).
+
+Similarly, if a judje test fails, we know that the tested model is not the source of the problem, because the judge is given a hard-coded answer and *ask_capital* is never called. The cause of the failure can be a failed call to Ollama or a wrong verdict from the judge.
 
 ### Comclusion 
 
